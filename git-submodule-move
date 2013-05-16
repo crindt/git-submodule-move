@@ -1,0 +1,29 @@
+#!/bin/bash
+
+if [ $# -lt 2 ]; then
+   echo "You must specify both the old path and the new"
+   exit 1
+else
+   oldPath="$1"
+   newPath="$2"
+   echo "Moving repo submodule $1 to $2 [enter to continue]"
+   read ok
+fi
+
+
+orginUrl=`git config --local --get submodule.${oldPath}.url`
+
+## add new submodule
+mkdir -p `dirname "${newPath}"`
+git submodule add -- "${orginUrl}" "${newPath}"
+
+## remove old submodule
+git config -f .git/config --remove-section "submodule.${oldPath}"
+git config -f .gitmodules --remove-section "submodule.${oldPath}"
+git rm --cached "${oldPath}"
+rm -rf "${oldPath}"              ## remove old src
+rm -rf ".git/modules/${oldPath}" ## cleanup gitdir (housekeeping)
+
+## commit
+git add .gitmodules
+git commit -m "Renamed ${oldPath} to ${newPath}"

@@ -13,6 +13,23 @@ fi
 
 orginUrl=`git config --local --get submodule.${oldPath}.url`
 
+# Do some sanity checks
+
+if git submodule status ${oldPath} 2>&1| grep pathspec || [ "${orginUrl}" == "" ]; then 
+    echo "Doesn't look like ${oldPath} is an existing submodule"; 
+    exit 1
+fi
+fi
+
+if [ -e "${newPath}" ]; then
+    echo "Something already exists at ${newPath}...can't repo move there"
+    exit 1
+fi
+
+echo "OK2"
+read ok
+
+
 ## add new submodule
 mkdir -p `dirname "${newPath}"`
 git submodule add -- "${orginUrl}" "${newPath}"
